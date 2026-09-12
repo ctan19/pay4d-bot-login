@@ -1,0 +1,42 @@
+# Python cache/build output
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Local browser/session artifacts
+.chrome-manual-profile/
+cookies_*.pkl
+chromedriver.log
+
+# Secrets and private keys
+.env
+*.env
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
