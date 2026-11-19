@@ -75,6 +75,26 @@ $env:PAY4D_DEPLOY_REMOTE_DIR = "/app/titi4d/blue-scraper-pay4d"
 python relogin.py
 ```
 
+Jika private key Anda bukan file `.pem` di root project (misalnya
+`id_rsa`), arahkan script ke key tersebut:
+
+```powershell
+$env:PAY4D_SSH_KEY = "$env:USERPROFILE\Downloads\.ssh\id_rsa"
+python relogin.py
+```
+
+Untuk menyimpan konfigurasi ini untuk PowerShell berikutnya:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  "PAY4D_SSH_KEY",
+  "$env:USERPROFILE\Downloads\.ssh\id_rsa",
+  "User"
+)
+```
+
+Tutup lalu buka PowerShell kembali setelah menjalankan perintah penyimpanan.
+
 Jika memakai private key `.pem`, simpan sementara di root project saat menjalankan
 script. File `.pem` tidak akan ikut ke Git.
 

@@ -9,9 +9,8 @@ Google's OAuth flow accepts a manual sign-in. After you complete the
 to the server, and ssh's a sudo mv into the project dir.
 
 Requirements on the workstation:
-  - A `.pem` private key file in this project directory. The script
-    globs for `*.pem` so the subordinate can drop their own key here
-    without editing code.
+  - An SSH private key, either supplied via PAY4D_SSH_KEY, placed as a
+    single `.pem` file in this project directory, or configured in SSH.
   - `scp` and `ssh` on PATH (Windows 10+/11 have OpenSSH built in).
 
 Skip deployment with `--no-deploy` if you just want the pkl locally.
@@ -24,6 +23,11 @@ import sys
 import time
 import urllib.request
 from typing import Optional
+
+from dotenv import load_dotenv
+
+_PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_PROJECT_DIR, ".env"), override=False)
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -144,11 +148,21 @@ def _wait_for_chrome_debugger(port: int) -> None:
 
 
 def _locate_ssh_key() -> Optional[str]:
-    """Find an SSH private key to use for scp/ssh. Looks for any *.pem
-    in the project root. Returns the absolute path if exactly one is
-    present; returns None to fall back to the OS's default SSH config
-    (~/.ssh/config + default keys). Raises only on the ambiguous case
-    of multiple .pem files."""
+    """Find the SSH private key used for deployment.
+
+    PAY4D_SSH_KEY takes precedence. Otherwise, use exactly one project-local
+    .pem file, then fall back to the OS SSH configuration/default keys.
+    """
+    configured_path = os.getenv("PAY4D_SSH_KEY", "").strip()
+    if configured_path:
+        configured_path = os.path.expanduser(os.path.expandvars(configured_path))
+        if not os.path.isfile(configured_path):
+            raise FileNotFoundError(
+                "PAY4D_SSH_KEY does not point to a file: "
+                f"{configured_path}"
+            )
+        return os.path.abspath(configured_path)
+
     candidates = sorted(glob.glob(os.path.join(_PROJECT_DIR, "*.pem")))
     if len(candidates) == 1:
         return candidates[0]
@@ -171,14 +185,14 @@ def _deploy_pkl_to_server(pkl_path: str) -> None:
     remote_login = f"{DEPLOY_USER}@{DEPLOY_HOST}"
     remote_pkl = f"{DEPLOY_REMOTE_DIR.rstrip('/')}/cookies_after_login.pkl"
 
-    # Common flags. -i is appended only when we found a project-local
-    # key so that fallback users get their normal ~/.ssh/config behavior.
+    # -i is appended only when an explicit key was found so users relying on
+    # their normal ~/.ssh/config continue to work unchanged.
     common = ["-o", "StrictHostKeyChecking=accept-new"]
     if key_path:
         print(f"*** Using SSH key: {key_path}")
         common += ["-i", key_path]
     else:
-        print("*** No project-local *.pem — using default SSH config")
+        print("*** No PAY4D_SSH_KEY or project-local *.pem — using default SSH config")
 
     print(f"*** scp → {remote_login}:{DEPLOY_REMOTE_TMP}")
     subprocess.run(
