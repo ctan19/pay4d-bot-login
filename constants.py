@@ -9,8 +9,8 @@ COOKIES_AFTER_LOGIN_PKL = _os.path.join(
     'cookies_after_login.pkl',
 )
 
-ORIGIN_BASE_URL = 'https://agenttiti4d.com'
-BASE_URL = 'https://agenttiti4d.com/mimin/'
+ORIGIN_BASE_URL = 'https://8kuda4d.com'
+BASE_URL = 'https://8kuda4d.com/mimin/'
 ADMIN_AREA_PATH = '/mimin/adminarea'
 
 # Mirrors blue-scraper's deposits schema but with bank_tujuan replacing info.
